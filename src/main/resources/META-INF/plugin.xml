@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>top.walterInKitchen.gitDiffShort</id>
+    <name>GitDiffShort</name>
+    <vendor email="walterInKitchen@outlook.com" url="https://github.com/WalterInKitchen">WalterInKitchen</vendor>
+
+    <description>
+        可用来查看提交之间、分支之间的代码修改量;
+        展示总共修改的文件数量，总共增加的行数，删除的行数等信息；
+    </description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
