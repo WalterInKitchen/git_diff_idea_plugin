@@ -17,6 +17,15 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="top.walterInKitchen.gitdiff.toolsEntry"
+               popup="true"
+               text="Git Diff">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <action id="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
+                    class="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
+                    text="Compare Two Branches"
+                    description="Compare the modification between two branches">
+            </action>
+        </group>
     </actions>
 </idea-plugin>
