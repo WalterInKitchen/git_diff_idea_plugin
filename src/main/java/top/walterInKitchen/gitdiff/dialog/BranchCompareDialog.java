@@ -31,6 +31,7 @@ public class BranchCompareDialog extends DialogWrapper {
     private final JLabel changesLabel = new JLabel();
     private String firstPre = null;
     private String secondPre = null;
+    private static final int WIDTH = 350;
 
     public BranchCompareDialog(@Nullable Project project) {
         super(project);
@@ -65,14 +66,14 @@ public class BranchCompareDialog extends DialogWrapper {
         firstBranchBox.addItemListener(e -> updateGitDiff());
         panel.setLayout(null);
         panel.add(firstBranchBox);
-        firstBranchBox.setBounds(10, 20, 300, 30);
+        firstBranchBox.setBounds(10, 10, WIDTH, 30);
 
         this.branches.forEach(secondBranchBox::addItem);
         secondBranchBox.addItemListener(e -> updateGitDiff());
         panel.add(secondBranchBox);
 
-        secondBranchBox.setBounds(10, 60, 300, 30);
-        changesLabel.setBounds(10, 100, 300, 30);
+        secondBranchBox.setBounds(10, 50, WIDTH, 30);
+        changesLabel.setBounds(10, 100, WIDTH, 30);
         panel.add(changesLabel);
         updateGitDiff();
     }
