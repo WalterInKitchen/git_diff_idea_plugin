@@ -4,8 +4,7 @@
     <vendor email="walterInKitchen@outlook.com" url="https://github.com/WalterInKitchen">WalterInKitchen</vendor>
 
     <description>
-        可用来查看分支之间的代码修改量;
-        展示总共修改的文件数量，总共增加的行数，删除的行数等信息；
+        A git tool for display difference between branches;
     </description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
