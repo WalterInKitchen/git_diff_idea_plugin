@@ -14,17 +14,8 @@ import java.nio.file.Paths;
  * @Date: 2021/11/14
  **/
 public class GitFactory {
-    private static volatile Git git;
-
     public static Git getGitInstance(String basePath) throws GitException {
-        if (git == null) {
-            synchronized (Git.class) {
-                if (git == null) {
-                    git = new Git(buildRepositoryFromPath(basePath));
-                }
-            }
-        }
-        return git;
+        return new Git(buildRepositoryFromPath(basePath));
     }
 
     private static Repository buildRepositoryFromPath(String basePath) throws GitException {

@@ -17,8 +17,8 @@
 
     <actions>
         <group id="top.walterInKitchen.gitdiff.toolsEntry"
-               popup="true"
-               text="Git Diff">
+               class="top.walterInKitchen.gitdiff.actions.MainGroup"
+               popup="true" text="Git Diff">
             <add-to-group group-id="ToolsMenu" anchor="first"/>
             <action id="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
                     class="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
