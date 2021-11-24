@@ -3,6 +3,7 @@ package top.walterInKitchen.gitdiff.git;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.jetbrains.annotations.NotNull;
 import top.walterInKitchen.gitdiff.exception.GitException;
 
 import java.io.File;
@@ -20,7 +21,7 @@ public class GitFactory {
 
     private static Repository buildRepositoryFromPath(String basePath) throws GitException {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Path path = Paths.get(basePath, ".git");
+        Path path = findGitParent(basePath);
         try {
             File file = path.toFile();
             assertIfNotValidFolder(file);
@@ -32,6 +33,16 @@ public class GitFactory {
             exception.printStackTrace();
             throw new GitException("open git repository error");
         }
+    }
+
+    @NotNull
+    private static Path findGitParent(String basePath) {
+        final Path path = Paths.get(basePath, ".git");
+        final File file = path.toFile();
+        if (file.exists() && file.isDirectory()) {
+            return file.toPath();
+        }
+        return findGitParent(Paths.get(basePath).getParent().toString());
     }
 
     private static void assertIfNotValidFolder(File file) {
