@@ -1,7 +1,6 @@
 package top.walterInKitchen.gitdiff.dialog;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -25,21 +24,34 @@ import java.util.List;
  **/
 public class BranchCompareDialog extends DialogWrapper {
     private final Git git;
-    private final List<String> branches = new ArrayList<>();
-    private final JComboBox<String> firstBranchBox = new ComboBox<>();
-    private final JComboBox<String> secondBranchBox = new ComboBox<>();
-    private final JLabel changesLabel = new JLabel();
     private String firstPre = null;
     private String secondPre = null;
-    private static final int WIDTH = 350;
+    private JComboBox<String> comboBox1;
+    private JComboBox<String> comboBox2;
+    private JLabel diffLabel;
+    private JPanel mainPanel;
 
     public BranchCompareDialog(@Nullable Project project) {
         super(project);
         assert project != null;
         this.git = GitFactory.getGitInstance(project.getBasePath());
         setTitle("Compare Two Branches");
+        initComponent();
         loadGitBranches();
+        updateGitDiff();
         init();
+    }
+
+    private void initComponent() {
+        final TwoBranchCompare frame = new TwoBranchCompare();
+        this.mainPanel = frame.getMainPanel();
+        this.diffLabel = frame.getDiffLabel();
+
+        this.comboBox1 = frame.getComboBox1();
+        this.comboBox1.addItemListener(it -> updateGitDiff());
+
+        this.comboBox2 = frame.getComboBox2();
+        this.comboBox2.addItemListener(it -> updateGitDiff());
     }
 
     private void loadGitBranches() {
@@ -47,8 +59,11 @@ public class BranchCompareDialog extends DialogWrapper {
             List<Ref> list = git.branchList()
                     .setListMode(ListBranchCommand.ListMode.ALL)
                     .call();
-            branches.clear();
-            list.forEach(b -> branches.add(b.getName()));
+            list.stream().map(Ref::getName)
+                    .forEach(name -> {
+                        this.comboBox1.addItem(name);
+                        this.comboBox2.addItem(name);
+                    });
         } catch (GitAPIException exception) {
             exception.printStackTrace();
         }
@@ -56,31 +71,12 @@ public class BranchCompareDialog extends DialogWrapper {
 
     @Override
     protected @Nullable JComponent createCenterPanel() {
-        JPanel panel = new JPanel();
-        addBranch1Select1ToPanel(panel);
-        return panel;
-    }
-
-    private void addBranch1Select1ToPanel(JPanel panel) {
-        this.branches.forEach(firstBranchBox::addItem);
-        firstBranchBox.addItemListener(e -> updateGitDiff());
-        panel.setLayout(null);
-        panel.add(firstBranchBox);
-        firstBranchBox.setBounds(10, 10, WIDTH, 30);
-
-        this.branches.forEach(secondBranchBox::addItem);
-        secondBranchBox.addItemListener(e -> updateGitDiff());
-        panel.add(secondBranchBox);
-
-        secondBranchBox.setBounds(10, 50, WIDTH, 30);
-        changesLabel.setBounds(10, 100, WIDTH, 30);
-        panel.add(changesLabel);
-        updateGitDiff();
+        return this.mainPanel;
     }
 
     private void updateGitDiff() {
-        String branch1 = String.valueOf(this.firstBranchBox.getSelectedItem());
-        String branch2 = String.valueOf(this.secondBranchBox.getSelectedItem());
+        String branch1 = String.valueOf(this.comboBox1.getSelectedItem());
+        String branch2 = String.valueOf(this.comboBox2.getSelectedItem());
         if (branch1.equals(firstPre) && branch2.equals(secondPre)) {
             return;
         }
@@ -104,7 +100,7 @@ public class BranchCompareDialog extends DialogWrapper {
             while ((s = reader.readLine()) != null) {
                 last = s;
             }
-            changesLabel.setText(last == null ? "changes: 0" : last);
+            this.diffLabel.setText(last == null ? "changes: 0" : last);
         } catch (IOException e) {
             e.printStackTrace();
         }
