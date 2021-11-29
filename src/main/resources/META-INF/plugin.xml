@@ -4,7 +4,7 @@
     <vendor email="walterInKitchen@outlook.com" url="https://github.com/WalterInKitchen">WalterInKitchen</vendor>
 
     <description>
-        A git tool for display difference between branches;
+        A git tool for display differences between branches;
     </description>
 
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
@@ -12,7 +12,6 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
     </extensions>
 
     <actions>
