@@ -22,7 +22,7 @@ intellij {
     version = '2021.2.3'
 }
 patchPluginXml {
-    sinceBuild = "191.*"
+    sinceBuild = "193.5662.53"
 }
 test {
     useJUnitPlatform()
