@@ -14,7 +14,9 @@ public class MainGroup extends DefaultActionGroup {
     @Override
     public void update(@NotNull AnActionEvent event) {
         final Project project = event.getProject();
-        assert project != null;
+        if (project == null) {
+            return;
+        }
         try {
             GitFactory.getGitInstance(project.getBasePath());
             event.getPresentation().setEnabled(true);
