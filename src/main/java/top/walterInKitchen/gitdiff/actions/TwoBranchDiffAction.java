@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
-import top.walterInKitchen.gitdiff.dialog.BranchCompareDialog;
+import top.walterInKitchen.gitdiff.component.BranchCompareDialog;
 
 /**
  * @Author: walter

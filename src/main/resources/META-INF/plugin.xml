@@ -12,6 +12,8 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <statusBarWidgetFactory
+                implementation="top.walterInKitchen.gitdiff.component.StatusBarFactory"/>
     </extensions>
 
     <actions>
