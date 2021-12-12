@@ -22,7 +22,7 @@ public class StatusBarFactory implements StatusBarWidgetFactory {
 
     @Override
     public @Nls @NotNull String getDisplayName() {
-        return "Diff Status";
+        return "UnCommitted Changes";
     }
 
     @Override
