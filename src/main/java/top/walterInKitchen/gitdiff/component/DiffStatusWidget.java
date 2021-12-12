@@ -3,12 +3,12 @@ package top.walterInKitchen.gitdiff.component;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
-import org.eclipse.jgit.api.Git;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import top.walterInKitchen.gitdiff.git.GitFactory;
 
 import javax.swing.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @Author: walter
  * @Date: 2021/12/11
  **/
-public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
+public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseListener {
     private static final Integer DELAY = 2;
     private final Project project;
     private final Component component;
@@ -33,6 +33,8 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
     public DiffStatusWidget(Project project) {
         this.project = project;
         this.component = new Component(this);
+        this.component.addMouseListener(this);
+
         executorService.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
     }
 
@@ -56,7 +58,6 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
     }
 
     private DiffStat getDiff() {
-        Git git = GitFactory.getGitInstance(this.project.getBasePath());
         List<String> cmd = new ArrayList<>();
         cmd.add("git");
         cmd.add("diff");
@@ -83,15 +84,41 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
     @Override
     public void run() {
         try {
-            final DiffStat diff = getDiff();
-            this.component.showChanges(diff);
+            updateWidget();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
 
+    private void updateWidget() {
+        final DiffStat diff = getDiff();
+        this.component.showChanges(diff);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+        updateWidget();
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+    }
+
     private static class Component extends JLabel {
         public void showChanges(DiffStat stat) {
+            this.setToolTipText(formatToolTip(stat));
             if (stat == null) {
                 this.setText("-|-");
                 return;
@@ -109,7 +136,6 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
                 builder.append("-").append(stat.getDeletions());
             }
             this.setText(builder.toString());
-            this.setToolTipText(formatToolTip(stat));
         }
 
         private String formatToolTip(DiffStat stat) {
