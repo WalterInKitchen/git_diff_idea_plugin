@@ -32,7 +32,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
     public DiffStatusWidget(Project project) {
         this.project = project;
-        this.component = new Component(this);
+        this.component = new Component();
         this.component.addMouseListener(this);
 
         executorService.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
@@ -147,7 +147,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
                     " deletions:" + stat.getDeletions();
         }
 
-        public Component(DiffStatusWidget widget) {
+        public Component() {
             showChanges(null);
         }
     }
