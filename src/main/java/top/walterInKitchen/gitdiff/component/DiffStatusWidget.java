@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +63,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
         cmd.add("head");
         cmd.add("--stat");
         ProcessBuilder builder = new ProcessBuilder(cmd);
-//        builder.directory(git.getRepository().getDirectory());
-        builder.directory(new File(project.getBasePath()));
+        builder.directory(new File(Objects.requireNonNull(project.getBasePath())));
 
         try {
             final Process process = builder.start();
@@ -109,6 +109,16 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable {
                 builder.append("-").append(stat.getDeletions());
             }
             this.setText(builder.toString());
+            this.setToolTipText(formatToolTip(stat));
+        }
+
+        private String formatToolTip(DiffStat stat) {
+            if (stat == null) {
+                return "no file changed";
+            }
+            return "fileChanged:" + stat.getFileChanged() +
+                    " insertions:" + stat.getInsertions() +
+                    " deletions:" + stat.getDeletions();
         }
 
         public Component(DiffStatusWidget widget) {
