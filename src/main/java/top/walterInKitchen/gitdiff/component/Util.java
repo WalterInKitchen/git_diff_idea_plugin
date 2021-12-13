@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
  * @Date: 2021/12/11
  **/
 public class Util {
-    //    private static final Pattern DIFF_STAT_PATTERN = Pattern.compile(".*?(\\d+).*?(\\d+).*?(\\d+).*");
     private static final Pattern DIFF_FILE_CHANGED = Pattern.compile("(\\d+)\\s+file.*");
     private static final Pattern DIFF_INSERTION = Pattern.compile(".*?(\\d+)\\s+insertion.*");
     private static final Pattern DIFF_DELETION = Pattern.compile(".*?(\\d+)\\s+deletion.*");
