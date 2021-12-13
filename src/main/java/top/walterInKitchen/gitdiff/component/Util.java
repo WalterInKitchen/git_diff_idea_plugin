@@ -9,28 +9,36 @@ import java.util.regex.Pattern;
  * @Date: 2021/12/11
  **/
 public class Util {
-    private static final Pattern DIFF_STAT_PATTERN = Pattern.compile(".*?(\\d+).*?(\\d+).*?(\\d+).*");
+    //    private static final Pattern DIFF_STAT_PATTERN = Pattern.compile(".*?(\\d+).*?(\\d+).*?(\\d+).*");
+    private static final Pattern DIFF_FILE_CHANGED = Pattern.compile("(\\d+)\\s+file.*");
+    private static final Pattern DIFF_INSERTION = Pattern.compile(".*?(\\d+)\\s+insertion.*");
+    private static final Pattern DIFF_DELETION = Pattern.compile(".*?(\\d+)\\s+deletion.*");
 
     /**
      * parse git diff last line to stat
      *
-     * @param last string like this: 8 files changed, 440 insertions(+), 281 deletions(-)
+     * @param source string like this: 8 files changed, 440 insertions(+), 281 deletions(-)
      * @return the object represent
      */
     @Nullable
-    public static DiffStat parseDiffStat(String last) {
-        if (last == null) {
+    public static DiffStat parseDiffStat(String source) {
+        if (source == null) {
             return null;
         }
-        final Matcher matcher = DIFF_STAT_PATTERN.matcher(last);
-        if (!matcher.matches()) {
-            return DiffStat.builder().setDeletions(0).setInsertions(0).setFileChanged(0).build();
+        final String plain = source.trim();
+        final DiffStat.DiffStatBuilder builder = DiffStat.builder().setDeletions(0).setInsertions(0).setFileChanged(0);
+        final Matcher fileMatcher = DIFF_FILE_CHANGED.matcher(plain);
+        if (fileMatcher.matches()) {
+            builder.setFileChanged(Integer.parseInt(fileMatcher.group(1)));
         }
-        final DiffStat.DiffStatBuilder builder = DiffStat.builder();
-        builder.setFileChanged(Integer.parseInt(matcher.group(1)));
-        builder.setInsertions(Integer.parseInt(matcher.group(2)));
-        builder.setDeletions(Integer.parseInt(matcher.group(3)));
+        final Matcher insertionMatcher = DIFF_INSERTION.matcher(plain);
+        if (insertionMatcher.matches()) {
+            builder.setInsertions(Integer.parseInt(insertionMatcher.group(1)));
+        }
+        final Matcher deletionMatcher = DIFF_DELETION.matcher(plain);
+        if (deletionMatcher.matches()) {
+            builder.setDeletions(Integer.parseInt(deletionMatcher.group(1)));
+        }
         return builder.build();
     }
-
 }
