@@ -16,6 +16,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -120,20 +121,15 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
         public void showChanges(DiffStat stat) {
             this.setToolTipText(formatToolTip(stat));
             if (stat == null) {
-                this.setText("-|-");
+                this.setText("0");
                 return;
             }
-            StringBuilder builder = new StringBuilder();
-            if (stat.getInsertions() == null) {
-                builder.append("-");
-            } else {
-                builder.append("+").append(stat.getInsertions());
-            }
-            builder.append("|");
-            if (stat.getDeletions() == null) {
-                builder.append("-");
-            } else {
-                builder.append("-").append(stat.getDeletions());
+            final Integer insertions = Optional.ofNullable(stat.getInsertions()).orElse(0);
+            final Integer deletions = Optional.ofNullable(stat.getDeletions()).orElse(0);
+            int sum = insertions + deletions;
+            StringBuilder builder = new StringBuilder().append(sum);
+            if (sum != 0) {
+                builder.append("(").append("+").append(insertions).append("|").append("-").append(deletions).append(")");
             }
             this.setText(builder.toString());
         }
@@ -142,9 +138,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
             if (stat == null) {
                 return "no file changed";
             }
-            return "fileChanged:" + stat.getFileChanged() +
-                    " insertions:" + stat.getInsertions() +
-                    " deletions:" + stat.getDeletions();
+            return "fileChanged:" + stat.getFileChanged() + " insertions:" + stat.getInsertions() + " deletions:" + stat.getDeletions();
         }
 
         public Component() {
