@@ -4,9 +4,10 @@
     <vendor email="walterInKitchen@outlook.com" url="https://github.com/WalterInKitchen">WalterInKitchen</vendor>
 
     <description>
-        A git tool for display differences between branches;
+        A git tool
+        * show differences between two branches.
+        * show uncommitted changes in widget.
     </description>
-
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
