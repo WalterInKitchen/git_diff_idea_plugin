@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -137,10 +138,24 @@ public class BranchCompareDialog extends DialogWrapper {
             while ((s = reader.readLine()) != null) {
                 last = s;
             }
-            this.diffLabel.setText(last == null ? "changes: 0" : last);
+            DiffStat diffStat = Util.parseDiffStat(last);
+            showDiff(diffStat);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showDiff(DiffStat diffStat) {
+        if (diffStat == null) {
+            this.diffLabel.setText("changes: 0");
+            return;
+        }
+        Integer ins = Optional.ofNullable(diffStat.getInsertions()).orElse(0);
+        Integer dls = Optional.ofNullable(diffStat.getDeletions()).orElse(0);
+
+        String changes = "changes:" + (ins + dls)
+                + "(+" + ins + "|-" + dls + ")";
+        this.diffLabel.setText(changes);
     }
 
     @Override
