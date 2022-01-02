@@ -62,7 +62,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
         List<String> cmd = new ArrayList<>();
         cmd.add("git");
         cmd.add("diff");
-        cmd.add("head");
+        cmd.add("HEAD");
         cmd.add("--stat");
         ProcessBuilder builder = new ProcessBuilder(cmd);
         builder.directory(new File(Objects.requireNonNull(project.getBasePath())));
