@@ -147,14 +147,15 @@ public class BranchCompareDialog extends DialogWrapper {
 
     private void showDiff(DiffStat diffStat) {
         if (diffStat == null) {
-            this.diffLabel.setText("changes: 0");
+            this.diffLabel.setText("0");
             return;
         }
-        Integer ins = Optional.ofNullable(diffStat.getInsertions()).orElse(0);
-        Integer dls = Optional.ofNullable(diffStat.getDeletions()).orElse(0);
+        int files = Optional.ofNullable(diffStat.getFileChanged()).orElse(0);
+        int ins = Optional.ofNullable(diffStat.getInsertions()).orElse(0);
+        int dls = Optional.ofNullable(diffStat.getDeletions()).orElse(0);
 
-        String changes = "changes:" + (ins + dls)
-                + "(+" + ins + "|-" + dls + ")";
+        String changes = (ins + dls) + "(+" + ins + "|-" + dls + ")  "
+                + "[" + diffStat.getFileChanged() + " file" + ((files > 1) ? "s" : "") + "]";
         this.diffLabel.setText(changes);
     }
 
