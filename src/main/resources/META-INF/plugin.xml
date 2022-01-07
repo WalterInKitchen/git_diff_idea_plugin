@@ -8,8 +8,6 @@
         * show differences between two branches.
         * show uncommitted changes in widget.
     </description>
-    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
-         on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
