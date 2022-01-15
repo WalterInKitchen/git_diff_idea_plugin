@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,14 +30,15 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
     private static final Integer DELAY = 2;
     private final Project project;
     private final Component component;
-    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService schedulePool = Executors.newScheduledThreadPool(1);
+    private final ExecutorService pendingPool = Executors.newFixedThreadPool(1);
 
     public DiffStatusWidget(Project project) {
         this.project = project;
         this.component = new Component();
         this.component.addMouseListener(this);
 
-        executorService.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
+        schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
     @Override
     public void dispose() {
-        executorService.shutdown();
+        schedulePool.shutdown();
     }
 
     private DiffStat getDiff() {
@@ -110,7 +112,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        updateWidget();
+        pendingPool.submit(this::updateWidget);
     }
 
     @Override

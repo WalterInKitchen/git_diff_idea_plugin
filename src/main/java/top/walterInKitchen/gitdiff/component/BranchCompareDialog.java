@@ -19,6 +19,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -26,7 +28,6 @@ import java.util.stream.Collectors;
  * @Date: 2021/11/14
  **/
 public class BranchCompareDialog extends DialogWrapper {
-    private final String PREFIX = "top.walterInKitchen.gitdiff.dialog.BranchCompareDialog";
     private final Git git;
     private final TwoBranchDiffPersistService persistService;
     private String firstPre = null;
@@ -35,6 +36,7 @@ public class BranchCompareDialog extends DialogWrapper {
     private JComboBox<String> comboBox2;
     private JLabel diffLabel;
     private JPanel mainPanel;
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private final List<String> branches = new ArrayList<>();
 
     public BranchCompareDialog(@Nullable Project project) {
@@ -60,6 +62,9 @@ public class BranchCompareDialog extends DialogWrapper {
             return;
         }
         final TwoBranchDiffPersistService.Branches state = persistService.getState();
+        if (state == null) {
+            return;
+        }
         String branch1 = state.getBranch1();
         String branch2 = state.getBranch2();
         if (!this.branches.contains(branch1) && this.branches.size() > 0) {
@@ -115,12 +120,20 @@ public class BranchCompareDialog extends DialogWrapper {
 
     private void persistSelected(String branch1, String branch2) {
         final TwoBranchDiffPersistService.Branches state = persistService.getState();
+        if (state == null) {
+            return;
+        }
         state.setBranch1(branch1);
         state.setBranch2(branch2);
         persistService.loadState(state);
     }
 
     private void updateGitDiff(String branch1, String branch2) {
+        showLoading();
+        executorService.submit(() -> analysisAndShowDiff(branch1, branch2));
+    }
+
+    private void analysisAndShowDiff(String branch1, String branch2) {
         final Repository repository = this.git.getRepository();
         List<String> cmd = new ArrayList<>();
         cmd.add("git");
@@ -143,6 +156,10 @@ public class BranchCompareDialog extends DialogWrapper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showLoading() {
+        this.diffLabel.setText("Loading...");
     }
 
     private void showDiff(DiffStat diffStat) {
