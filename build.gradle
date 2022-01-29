@@ -24,7 +24,7 @@ dependencies {
 }
 
 intellij {
-    version = '2021.3.1'
+    version = '2021.3.2'
 }
 patchPluginXml {
     sinceBuild = "201.7223.91"
