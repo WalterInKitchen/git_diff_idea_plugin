@@ -15,7 +15,7 @@ public class TwoBranchDiffAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = event.getProject();
         BranchCompareDialog dialog = new BranchCompareDialog(project);
-        dialog.setSize(410, 220);
+        dialog.setSize(510, 220);
         dialog.setResizable(false);
         dialog.show();
     }
