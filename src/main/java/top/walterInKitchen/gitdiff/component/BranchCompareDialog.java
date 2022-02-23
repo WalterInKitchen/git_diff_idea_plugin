@@ -12,7 +12,6 @@ import top.walterInKitchen.gitdiff.git.GitFactory;
 import top.walterInKitchen.gitdiff.persist.TwoBranchDiffPersistService;
 
 import javax.swing.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,8 +30,8 @@ import java.util.concurrent.Executors;
 public class BranchCompareDialog extends DialogWrapper {
     private final Git git;
     private final TwoBranchDiffPersistService persistService;
-    private String firstPre = null;
-    private String secondPre = null;
+    private Branch firstPre = null;
+    private Branch secondPre = null;
     private JComboBox<Branch> branchBox1;
     private JComboBox<Branch> branchBox2;
     private JComboBox<Remote> remoteBox1;
@@ -40,7 +39,6 @@ public class BranchCompareDialog extends DialogWrapper {
     private JLabel diffLabel;
     private JPanel mainPanel;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-    private final List<String> branches = new ArrayList<>();
 
     public BranchCompareDialog(@Nullable Project project) {
         super(project);
@@ -49,7 +47,6 @@ public class BranchCompareDialog extends DialogWrapper {
         this.persistService = TwoBranchDiffPersistService.getInstance(project);
         initComponent();
         loadGitRemotes();
-        loadGitBranches();
         loadPreviouslySelectedBranches(project);
         addChangeListener();
         branchSelectChanged();
@@ -69,16 +66,27 @@ public class BranchCompareDialog extends DialogWrapper {
         if (state == null) {
             return;
         }
-        String branch1 = state.getBranch1();
-        String branch2 = state.getBranch2();
-        if (!this.branches.contains(branch1) && this.branches.size() > 0) {
-            branch1 = this.branches.get(0);
+        selectBoxWithName(state.getRemote1(), this.remoteBox1);
+        selectBoxWithName(state.getRemote2(), this.remoteBox2);
+        this.remoteChanged(this.remoteBox2, this.branchBox2);
+        this.remoteChanged(this.remoteBox1, this.branchBox1);
+        selectBoxWithName(state.getBranch1(), this.branchBox1);
+        selectBoxWithName(state.getBranch2(), this.branchBox2);
+    }
+
+    private void selectBoxWithName(String remoteName, JComboBox<? extends TextObject> remoteBox) {
+        int total = remoteBox.getItemCount();
+        if (total == 0) {
+            return;
         }
-        if (!this.branches.contains(branch2) && this.branches.size() > 0) {
-            branch2 = this.branches.get(0);
+        for (int i = 0; i < total; i++) {
+            TextObject remote = remoteBox.getItemAt(i);
+            if (remote.getText().equals(remoteName)) {
+                remoteBox.setSelectedIndex(i);
+                return;
+            }
         }
-        this.branchBox1.setSelectedItem(branch1);
-        this.branchBox2.setSelectedItem(branch2);
+        remoteBox.setSelectedIndex(0);
     }
 
     private void initComponent() {
@@ -96,8 +104,8 @@ public class BranchCompareDialog extends DialogWrapper {
         try {
             List<RemoteConfig> remoteConfigs = git.remoteList().call();
             List<Remote> remotes = RemoteFactory.buildRemotes(remoteConfigs);
-            initRemoteBox(this.remoteBox1, remotes, (evt) -> this.remote1Changed(evt, this.remoteBox1, this.branchBox1));
-            initRemoteBox(this.remoteBox2, remotes, (evt) -> this.remote1Changed(evt, this.remoteBox2, this.branchBox2));
+            initRemoteBox(this.remoteBox1, remotes, (evt) -> this.remoteChanged(this.remoteBox1, this.branchBox1));
+            initRemoteBox(this.remoteBox2, remotes, (evt) -> this.remoteChanged(this.remoteBox2, this.branchBox2));
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
@@ -109,7 +117,7 @@ public class BranchCompareDialog extends DialogWrapper {
         box.addItemListener(listener);
     }
 
-    private void remote1Changed(ItemEvent evt, JComboBox<Remote> remoteBox, JComboBox<Branch> branchBox) {
+    private void remoteChanged(JComboBox<Remote> remoteBox, JComboBox<Branch> branchBox) {
         branchBox.removeAllItems();
         Remote remote = (Remote) remoteBox.getSelectedItem();
         List<Branch> branches = remote == null ? Collections.emptyList() : remote.listBranch(git);
@@ -118,51 +126,41 @@ public class BranchCompareDialog extends DialogWrapper {
         branchBox.setRenderer(TextObjRender.getInstance());
     }
 
-    private void loadGitBranches() {
-//        try {
-//            List<Ref> list = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
-//            final List<String> branches = list.stream().map(Ref::getName).collect(Collectors.toList());
-//            this.branches.addAll(branches);
-//            this.branches.forEach(bh -> {
-//                this.branchBox1.addItem(bh);
-//                this.branchBox2.addItem(bh);
-//            });
-//        } catch (GitAPIException exception) {
-//            exception.printStackTrace();
-//        }
-    }
-
     @Override
     protected @Nullable JComponent createCenterPanel() {
         return this.mainPanel;
     }
 
     private void branchSelectChanged() {
-        String branch1 = String.valueOf(this.branchBox1.getSelectedItem());
-        String branch2 = String.valueOf(this.branchBox2.getSelectedItem());
-        if (branch1.equals(firstPre) && branch2.equals(secondPre)) {
+        Branch branch1 = (Branch) this.branchBox1.getSelectedItem();
+        Branch branch2 = (Branch) this.branchBox2.getSelectedItem();
+        if (branch1 == null || branch2 == null) {
+            return;
+        }
+        if (branchesNotChanged(branch1, branch2)) {
             return;
         }
         this.firstPre = branch1;
         this.secondPre = branch2;
-
-        updateGitDiff(branch1, branch2);
+        showLoading();
+        executorService.submit(() -> analysisAndShowDiff(branch1.getFullName(), branch2.getFullName()));
         persistSelected(branch1, branch2);
     }
 
-    private void persistSelected(String branch1, String branch2) {
+    private boolean branchesNotChanged(Branch branch1, Branch branch2) {
+        return this.firstPre == branch1 && this.secondPre == branch2;
+    }
+
+    private void persistSelected(Branch branch1, Branch branch2) {
         final TwoBranchDiffPersistService.Branches state = persistService.getState();
         if (state == null) {
             return;
         }
-        state.setBranch1(branch1);
-        state.setBranch2(branch2);
+        state.setRemote1(branch1.getRemote().getName());
+        state.setBranch1(branch1.getName());
+        state.setRemote2(branch2.getRemote().getName());
+        state.setBranch2(branch2.getName());
         persistService.loadState(state);
-    }
-
-    private void updateGitDiff(String branch1, String branch2) {
-        showLoading();
-        executorService.submit(() -> analysisAndShowDiff(branch1, branch2));
     }
 
     private void analysisAndShowDiff(String branch1, String branch2) {

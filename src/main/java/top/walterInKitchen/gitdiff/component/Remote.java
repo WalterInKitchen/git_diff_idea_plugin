@@ -1,6 +1,7 @@
 package top.walterInKitchen.gitdiff.component;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -14,6 +15,7 @@ import java.util.Locale;
 
 @Builder(setterPrefix = "set", toBuilder = true)
 @Getter
+@EqualsAndHashCode
 public class Remote implements TextObject {
     private String name;
     private boolean local;
@@ -27,7 +29,7 @@ public class Remote implements TextObject {
         if (git == null) {
             return Collections.emptyList();
         }
-        List<Ref> branches = null;
+        List<Ref> branches;
         try {
             branches = git.branchList().setListMode(ListBranchCommand.ListMode.ALL).call();
             List<Branch> res = new ArrayList<>();
@@ -79,10 +81,7 @@ public class Remote implements TextObject {
             return null;
         }
         String remoteName = text.substring(openIndex + 1, endIndex);
-        return Remote.builder()
-                .setName(remoteName)
-                .setLocal(false)
-                .build();
+        return Remote.builder().setName(remoteName).setLocal(false).build();
     }
 
     private String parseBranchName(String text) {
@@ -94,5 +93,12 @@ public class Remote implements TextObject {
             return text;
         }
         return text.substring(index + 1);
+    }
+
+    public String getFullName() {
+        if (isLocal()) {
+            return "refs/heads";
+        }
+        return "refs/remotes/" + name;
     }
 }
