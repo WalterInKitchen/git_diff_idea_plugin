@@ -24,6 +24,7 @@
                     class="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
                     text="Compare Two Branches"
                     description="Compare the modification between two branches">
+                <keyboard-shortcut first-keystroke="control alt D" second-keystroke="J" keymap="$default"/>
             </action>
         </group>
     </actions>
