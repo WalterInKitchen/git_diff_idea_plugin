@@ -66,12 +66,14 @@ public class BranchCompareDialog extends DialogWrapper {
         if (state == null) {
             return;
         }
+        String branch1 = state.getBranch1();
+        String branch2 = state.getBranch2();
         selectBoxWithName(state.getRemote1(), this.remoteBox1);
         selectBoxWithName(state.getRemote2(), this.remoteBox2);
-        this.remoteChanged(this.remoteBox2, this.branchBox2);
         this.remoteChanged(this.remoteBox1, this.branchBox1);
-        selectBoxWithName(state.getBranch1(), this.branchBox1);
-        selectBoxWithName(state.getBranch2(), this.branchBox2);
+        this.remoteChanged(this.remoteBox2, this.branchBox2);
+        selectBoxWithName(branch1, this.branchBox1);
+        selectBoxWithName(branch2, this.branchBox2);
     }
 
     private void selectBoxWithName(String remoteName, JComboBox<? extends TextObject> remoteBox) {
