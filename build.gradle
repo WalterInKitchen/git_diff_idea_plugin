@@ -1,13 +1,15 @@
 plugins {
-    id 'org.jetbrains.intellij' version '1.0'
     id 'java'
+    id 'org.jetbrains.intellij' version '1.5.3'
 }
 
 group 'top.walterInKitchen'
-version '1.1.11'
+version '1.1.12'
 
 repositories {
     mavenCentral()
+    maven { url 'https://maven.aliyun.com/repository/google/' }
+    maven { url 'https://maven.aliyun.com/repository/jcenter/'}
 }
 
 dependencies {
@@ -24,7 +26,7 @@ dependencies {
 }
 
 intellij {
-    version = '2021.3.3'
+    version = '2022.1'
 }
 patchPluginXml {
     sinceBuild = "201.7223.91"
