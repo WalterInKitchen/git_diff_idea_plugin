@@ -2,6 +2,7 @@ package top.walterInKitchen.gitdiff.component;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 /**
  * @Author: walter
@@ -9,6 +10,7 @@ import lombok.Getter;
  **/
 @Getter
 @Builder(toBuilder = true, setterPrefix = "set")
+@ToString
 public class DiffStat {
     private Integer fileChanged;
     private Integer insertions;
