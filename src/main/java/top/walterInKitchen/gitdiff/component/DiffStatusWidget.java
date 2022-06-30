@@ -1,6 +1,9 @@
 package top.walterInKitchen.gitdiff.component;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.newvfs.BulkFileListener;
+import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
 import org.jetbrains.annotations.NonNls;
@@ -38,7 +41,18 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
         this.component = new Component();
         this.component.addMouseListener(this);
 
+        monitorFileChangedEvt(this);
         schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
+    }
+
+    private void monitorFileChangedEvt(Runnable runnable) {
+        project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES,
+                new BulkFileListener() {
+                    @Override
+                    public void after(@NotNull List<? extends VFileEvent> events) {
+                        runnable.run();
+                    }
+                });
     }
 
     @Override
