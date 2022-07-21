@@ -13,6 +13,10 @@ import top.walterInKitchen.gitdiff.persist.TwoBranchDiffPersistService;
 
 import javax.swing.*;
 import java.awt.event.ItemListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -163,8 +167,27 @@ public class BranchCompareDialog extends DialogWrapper {
 
     private void analysisAndShowDiff(String branch1, String branch2) {
         final Repository repository = this.git.getRepository();
-        DiffStat diffStat = new BranchComparator(repository).showDiff(branch1, branch2);
-        showDiff(diffStat);
+        List<String> cmd = new ArrayList<>();
+        cmd.add("git");
+        cmd.add("diff");
+        cmd.add("--stat");
+        cmd.add(branch1);
+        cmd.add(branch2);
+        ProcessBuilder builder = new ProcessBuilder(cmd);
+        builder.directory(repository.getDirectory());
+        try {
+            final Process process = builder.start();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String s = null;
+            String last = null;
+            while ((s = reader.readLine()) != null) {
+                last = s;
+            }
+            DiffStat diffStat = Util.parseDiffStat(last);
+            showDiff(diffStat);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showLoading() {
