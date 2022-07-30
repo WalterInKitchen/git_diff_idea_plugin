@@ -3,17 +3,14 @@
     <name>GitDiffHelper</name>
     <vendor email="walterInKitchen@outlook.com" url="https://github.com/WalterInKitchen">WalterInKitchen</vendor>
 
-    <description>
-        A git tool
-        * show differences between two branches.
-        * show uncommitted changes in widget.
-    </description>
+    <description>(filled automatically by the build plugin)</description>
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <statusBarWidgetFactory
                 implementation="top.walterInKitchen.gitdiff.component.StatusBarFactory"/>
     </extensions>
+    <version>(filled automatically by the build plugin)</version>
 
     <actions>
         <group id="top.walterInKitchen.gitdiff.toolsEntry"
