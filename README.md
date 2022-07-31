@@ -1,6 +1,6 @@
 <!-- Plugin description -->
 ## DiffHelper
-* 实时统计代码未提交的代码
+* 实时统未提交的代码
 ![](image/realtimeChanges.png)
 
 * 统计两个分支间的差异
