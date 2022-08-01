@@ -1,5 +1,7 @@
 <!-- Plugin description -->
 ## DiffHelper
+帮助你统计你当前有多少未提交的代码，借助该插件你可以：
+
 * 实时统未提交的代码
 ![](image/realtimeChanges.png)
 
