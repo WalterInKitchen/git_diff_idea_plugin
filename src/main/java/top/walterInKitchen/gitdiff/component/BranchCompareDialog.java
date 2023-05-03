@@ -8,6 +8,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import top.walterInKitchen.gitdiff.git.DiffStat;
 import top.walterInKitchen.gitdiff.git.GitFactory;
 import top.walterInKitchen.gitdiff.persist.TwoBranchDiffPersistService;
 

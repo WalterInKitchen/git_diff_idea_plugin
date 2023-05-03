@@ -2,6 +2,7 @@ package top.walterInKitchen.gitdiff.component;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import top.walterInKitchen.gitdiff.git.DiffStat;
 
 /**
  * @Author: walter

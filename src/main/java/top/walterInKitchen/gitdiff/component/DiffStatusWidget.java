@@ -8,17 +8,14 @@ import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
+import top.walterInKitchen.gitdiff.git.CmdUnCommitChangesProvider;
+import top.walterInKitchen.gitdiff.git.DiffStat;
+import top.walterInKitchen.gitdiff.git.UnCommitChangesProvider;
 
 import javax.swing.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +32,8 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
     private final Component component;
     private final ScheduledExecutorService schedulePool = Executors.newScheduledThreadPool(1);
     private final ExecutorService pendingPool = Executors.newFixedThreadPool(1);
+    private final UnCommitChangesProvider unCommitChangesProvider;
+
 
     public DiffStatusWidget(Project project) {
         this.project = project;
@@ -43,16 +42,16 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
         monitorFileChangedEvt(this);
         schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
+        this.unCommitChangesProvider = CmdUnCommitChangesProvider.builder().basePath(this.project.getBasePath()).build();
     }
 
     private void monitorFileChangedEvt(Runnable runnable) {
-        project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES,
-                new BulkFileListener() {
-                    @Override
-                    public void after(@NotNull List<? extends VFileEvent> events) {
-                        runnable.run();
-                    }
-                });
+        project.getMessageBus().connect().subscribe(VirtualFileManager.VFS_CHANGES, new BulkFileListener() {
+            @Override
+            public void after(@NotNull List<? extends VFileEvent> events) {
+                runnable.run();
+            }
+        });
     }
 
     @Override
@@ -75,27 +74,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
     }
 
     private DiffStat getDiff() {
-        List<String> cmd = new ArrayList<>();
-        cmd.add("git");
-        cmd.add("diff");
-        cmd.add("HEAD");
-        cmd.add("--stat");
-        ProcessBuilder builder = new ProcessBuilder(cmd);
-        builder.directory(new File(Objects.requireNonNull(project.getBasePath())));
-
-        try {
-            final Process process = builder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String s = null;
-            String last = null;
-            while ((s = reader.readLine()) != null) {
-                last = s;
-            }
-            return Util.parseDiffStat(last);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return this.unCommitChangesProvider.getUnCommittedChanged();
     }
 
     @Override

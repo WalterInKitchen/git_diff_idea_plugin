@@ -1,5 +1,7 @@
 package top.walterInKitchen.gitdiff.component;
 
+import top.walterInKitchen.gitdiff.git.DiffStat;
+
 import javax.annotation.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

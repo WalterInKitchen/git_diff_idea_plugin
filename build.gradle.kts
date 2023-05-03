@@ -20,7 +20,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
-    implementation("org.eclipse.jgit:org.eclipse.jgit:6.1.0.202203080745-r") {
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.5.0.202303070854-r") {
         exclude("org.slf4j")
     }
 
