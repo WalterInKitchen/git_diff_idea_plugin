@@ -8,8 +8,8 @@ import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import top.walterInKitchen.gitdiff.git.CmdUnCommitChangesProvider;
 import top.walterInKitchen.gitdiff.git.DiffStat;
+import top.walterInKitchen.gitdiff.git.JgitUnCommitChangesProvider;
 import top.walterInKitchen.gitdiff.git.UnCommitChangesProvider;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2021/12/11
  **/
 public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseListener {
-    private static final Integer DELAY = 2;
+    private static final Integer DELAY = 5;
     private final Project project;
     private final Component component;
     private final ScheduledExecutorService schedulePool = Executors.newScheduledThreadPool(1);
@@ -42,7 +42,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
         monitorFileChangedEvt(this);
         schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
-        this.unCommitChangesProvider = CmdUnCommitChangesProvider.builder().basePath(this.project.getBasePath()).build();
+        this.unCommitChangesProvider = JgitUnCommitChangesProvider.build(this.project.getBasePath());
     }
 
     private void monitorFileChangedEvt(Runnable runnable) {
@@ -74,7 +74,12 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
     }
 
     private DiffStat getDiff() {
-        return this.unCommitChangesProvider.getUnCommittedChanged();
+        try {
+            return this.unCommitChangesProvider.getUnCommittedChanged();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            return null;
+        }
     }
 
     @Override
