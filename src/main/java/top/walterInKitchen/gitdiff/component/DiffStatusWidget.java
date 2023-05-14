@@ -138,7 +138,8 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
             if (stat == null) {
                 return "no file changed";
             }
-            return "fileChanged:" + stat.getFileChanged() + " insertions:" + stat.getInsertions() + " deletions:" + stat.getDeletions();
+            return String.format("%d files changed, %d insertions(+), %d deletions(-)",
+                    stat.getFileChanged(), stat.getInsertions(), stat.getDeletions());
         }
 
         public Component() {
