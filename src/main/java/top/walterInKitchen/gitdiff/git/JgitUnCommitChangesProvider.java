@@ -6,7 +6,6 @@ import lombok.Builder;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
@@ -42,29 +41,26 @@ public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
             int files = 0;
 
             for (DiffEntry entry : entries) {
-                try {
-                    diffFormatter.format(entry);
-                } catch (MissingObjectException exception) {
-                    continue;
-                }
+                out.reset();
                 files++;
-            }
 
-            String diffContent = out.toString();
-            boolean start = false;
-            for (String line : diffContent.split("\n")) {
-                if (line.startsWith("@@")) {
-                    start = true;
-                    continue;
+                diffFormatter.format(entry);
+                String diffContent = out.toString();
+                boolean start = false;
+                for (String line : diffContent.split("\n")) {
+                    if (line.startsWith("@@")) {
+                        start = true;
+                        continue;
+                    }
+                    if (line.startsWith("diff")) {
+                        start = false;
+                    }
+                    if (!start) {
+                        continue;
+                    }
+                    addLine += line.startsWith("+") ? 1 : 0;
+                    delLine += line.startsWith("-") ? 1 : 0;
                 }
-                if (line.startsWith("diff")) {
-                    start = false;
-                }
-                if (!start) {
-                    continue;
-                }
-                addLine += line.startsWith("+") ? 1 : 0;
-                delLine += line.startsWith("-") ? 1 : 0;
             }
 
             return DiffStat.builder()

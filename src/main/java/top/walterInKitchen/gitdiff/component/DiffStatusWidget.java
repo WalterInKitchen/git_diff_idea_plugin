@@ -42,9 +42,11 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
         this.component = new Component();
         this.component.addMouseListener(this);
 
-        monitorFileChangedEvt(this);
         schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
         this.unCommitChangesProvider = JgitUnCommitChangesProvider.build(this.project.getBasePath());
+        monitorFileChangedEvt(() -> {
+            pendingPool.submit(this::updateWidget);
+        });
     }
 
     private void monitorFileChangedEvt(Runnable runnable) {
