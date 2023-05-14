@@ -23,6 +23,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * Idea状态栏小插件
+ *
  * @Author: walter
  * @Date: 2021/12/11
  **/
