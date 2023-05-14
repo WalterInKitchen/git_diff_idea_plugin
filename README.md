@@ -1,14 +1,15 @@
 <!-- Plugin description -->
 ## DiffHelper
-帮助你统计你当前有多少未提交的代码，借助该插件你可以：
+Helps you track how much code you have currently not committed. With this plugin, you can:
 
-* 实时统未提交的代码
-![](https://plugins.jetbrains.com/files/18058/screenshot_d36abee9-9a5b-422a-9185-430bcae54c76)
+* Track real-time changes in your uncommitted code.
+![](https://github.com/WalterInKitchen/git_diff_idea_plugin/blob/master/image/realtimeChanges.png?raw=true)
 
-* 统计两个分支间的差异
-![](https://plugins.jetbrains.com/files/18058/screenshot_8da44039-6d51-48a9-956d-1f1c191fd609)
+* Compare the differences between two branches.
+![](https://github.com/WalterInKitchen/git_diff_idea_plugin/blob/master/image/branchCompare.png?raw=true)
+
+## About
+This plugin is still an early and experimental version.
+If you wish, you can contribute to its improvement.
+
 <!-- Plugin description end -->
-
-## 关于
-这个插件仍然是一个早期版本和实验版本，
-如果您愿意，您可以完善它。
