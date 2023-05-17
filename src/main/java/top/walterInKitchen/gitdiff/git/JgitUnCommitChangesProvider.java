@@ -33,6 +33,7 @@ public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             DiffFormatter diffFormatter = new DiffFormatter(out);
+            diffFormatter.setDiffComparator(CrlfRawTextComparator.INSTANCE);
             diffFormatter.setRepository(repository);
             List<DiffEntry> entries = diffFormatter.scan(oldTree, newTree);
 
