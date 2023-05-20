@@ -22,12 +22,11 @@ import static org.eclipse.jgit.lib.Constants.HEAD;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PRIVATE)
 public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
-    private final Git git;
+    private final Repository repository;
 
     @Override
     public DiffStat getUnCommittedChanged() {
         try {
-            Repository repository = git.getRepository();
             AbstractTreeIterator oldTree = getOldTree(repository);
             AbstractTreeIterator newTree = new FileTreeIterator(repository);
 
@@ -88,6 +87,8 @@ public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
 
     public static JgitUnCommitChangesProvider build(String basePath) {
         Git gitInstance = GitFactory.getGitInstance(basePath);
-        return JgitUnCommitChangesProvider.builder().git(gitInstance).build();
+        Repository repository = gitInstance.getRepository();
+        repository.getConfig().setBoolean("core", null, "autocrlf", false);
+        return JgitUnCommitChangesProvider.builder().repository(repository).build();
     }
 }
