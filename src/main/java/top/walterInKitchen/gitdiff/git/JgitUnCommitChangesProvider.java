@@ -3,92 +3,99 @@ package top.walterInKitchen.gitdiff.git;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.diff.Edit;
+import org.eclipse.jgit.diff.EditList;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
+import org.eclipse.jgit.patch.FileHeader;
+import org.eclipse.jgit.patch.HunkHeader;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.FileTreeIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
-
-import static org.eclipse.jgit.lib.Constants.HEAD;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PRIVATE)
 public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
-    private final Repository repository;
+    private static final Logger log = LoggerFactory.getLogger(JgitUnCommitChangesProvider.class);
+    private final String basePath;
 
     @Override
     public DiffStat getUnCommittedChanged() {
-        try {
-            AbstractTreeIterator oldTree = getOldTree(repository);
-            AbstractTreeIterator newTree = new FileTreeIterator(repository);
+        log.info(">> [{}] 开始计算未提交改动，仓库路径 = {}", JgitUnCommitChangesProvider.class.getSimpleName(), basePath);
+        try (Repository repo = new FileRepositoryBuilder()
+                .setGitDir(new File(basePath, ".git"))
+                .readEnvironment()
+                .findGitDir()
+                .build();
+             ObjectReader reader = repo.newObjectReader()) {
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            DiffFormatter diffFormatter = new DiffFormatter(out);
-            diffFormatter.setDiffComparator(CrlfRawTextComparator.INSTANCE);
-            diffFormatter.setRepository(repository);
-            List<DiffEntry> entries = diffFormatter.scan(oldTree, newTree);
+            // 1. 找到 HEAD 提交的 tree 对象
+            CanonicalTreeParser oldTreeIter = new CanonicalTreeParser();
+            try (RevWalk revWalk = new RevWalk(repo)) {
+                RevCommit headCommit = revWalk.parseCommit(repo.resolve("HEAD"));
+                oldTreeIter.reset(reader, headCommit.getTree().getId());
+            }
 
-            int addLine = 0;
-            int delLine = 0;
-            int files = 0;
+            // 2. 准备新的工作区迭代器
+            FileTreeIterator newTreeIter = new FileTreeIterator(repo);
 
-            for (DiffEntry entry : entries) {
-                out.reset();
-                files++;
+            // 3. 扫描 diff entries，并统计行数
+            int totalFiles = 0;
+            int totalInsertions = 0;
+            int totalDeletions = 0;
+            try (DiffFormatter diffFormatter = new DiffFormatter(org.eclipse.jgit.util.io.DisabledOutputStream.INSTANCE)) {
+                diffFormatter.setRepository(repo);
+                List<DiffEntry> diffs = diffFormatter.scan(oldTreeIter, newTreeIter);
+                totalFiles = diffs.size();
 
-                diffFormatter.format(entry);
-                String diffContent = out.toString();
-                boolean start = false;
-                for (String line : diffContent.split("\n")) {
-                    if (line.startsWith("@@")) {
-                        start = true;
-                        continue;
+                for (DiffEntry entry : diffs) {
+                    FileHeader header = diffFormatter.toFileHeader(entry);
+                    for (HunkHeader hunk : header.getHunks()) {
+                        EditList edits = hunk.toEditList();
+                        for (Edit edit : edits) {
+                            switch (edit.getType()) {
+                                case INSERT:
+                                    totalInsertions += edit.getLengthB();
+                                    break;
+                                case DELETE:
+                                    totalDeletions += edit.getLengthA();
+                                    break;
+                                case REPLACE:
+                                    totalInsertions += edit.getLengthB();
+                                    totalDeletions += edit.getLengthA();
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
-                    if (line.startsWith("diff")) {
-                        start = false;
-                    }
-                    if (!start) {
-                        continue;
-                    }
-                    addLine += line.startsWith("+") ? 1 : 0;
-                    delLine += line.startsWith("-") ? 1 : 0;
                 }
             }
 
-            return DiffStat.builder()
-                    .setFileChanged(files)
-                    .setInsertions(addLine)
-                    .setDeletions(delLine)
+            DiffStat diff = DiffStat.builder()
+                    .setFileChanged(totalFiles)
+                    .setInsertions(totalInsertions)
+                    .setDeletions(totalDeletions)
                     .build();
-        } catch (IOException exc) {
-            throw new RuntimeException(exc);
-        }
-    }
+            log.info(">> 变动 = {}", diff);
+            return diff;
 
-    private AbstractTreeIterator getOldTree(Repository repository) throws IOException {
-        ObjectId head = repository.resolve(HEAD + "^{tree}"); //$NON-NLS-1$
-        if (head == null) {
-            throw new RuntimeException("no head found");
+        } catch (IOException e) {
+            throw new RuntimeException("无法使用 JGit 读取未提交改动", e);
         }
-        CanonicalTreeParser oldTree = new CanonicalTreeParser();
-        try (ObjectReader reader = repository.newObjectReader()) {
-            oldTree.reset(reader, head);
-        }
-        return oldTree;
     }
 
     public static JgitUnCommitChangesProvider build(String basePath) {
-        Git gitInstance = GitFactory.getGitInstance(basePath);
-        Repository repository = gitInstance.getRepository();
-        repository.getConfig().setBoolean("core", null, "autocrlf", false);
-        return JgitUnCommitChangesProvider.builder().repository(repository).build();
+        return JgitUnCommitChangesProvider.builder().basePath(basePath).build();
     }
 }

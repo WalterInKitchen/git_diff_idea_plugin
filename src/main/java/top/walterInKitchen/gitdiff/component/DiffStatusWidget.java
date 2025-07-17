@@ -8,8 +8,8 @@ import com.intellij.openapi.wm.CustomStatusBarWidget;
 import com.intellij.openapi.wm.StatusBar;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
-import top.walterInKitchen.gitdiff.git.CmdUnCommitChangesProvider;
 import top.walterInKitchen.gitdiff.git.DiffStat;
+import top.walterInKitchen.gitdiff.git.JgitUnCommitChangesProvider;
 import top.walterInKitchen.gitdiff.git.UnCommitChangesProvider;
 
 import javax.swing.*;
@@ -44,7 +44,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
         this.component.addMouseListener(this);
 
         schedulePool.scheduleWithFixedDelay(this, DELAY, DELAY, TimeUnit.SECONDS);
-        this.unCommitChangesProvider = CmdUnCommitChangesProvider.builder().basePath(this.project.getBasePath()).build();
+        this.unCommitChangesProvider = JgitUnCommitChangesProvider.build(this.project.getBasePath());
         monitorFileChangedEvt(() -> {
             pendingPool.submit(this::updateWidget);
         });
