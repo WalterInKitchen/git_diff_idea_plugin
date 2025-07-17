@@ -13,4 +13,8 @@ public class DiffStat {
     private Integer fileChanged;
     private Integer insertions;
     private Integer deletions;
+
+    public static DiffStat empty() {
+        return new DiffStat(0, 0, 0);
+    }
 }

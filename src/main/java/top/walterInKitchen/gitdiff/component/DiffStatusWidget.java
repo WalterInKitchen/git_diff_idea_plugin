@@ -38,6 +38,7 @@ public class DiffStatusWidget implements CustomStatusBarWidget, Runnable, MouseL
 
 
     public DiffStatusWidget(Project project) {
+
         this.project = project;
         this.component = new Component();
         this.component.addMouseListener(this);
