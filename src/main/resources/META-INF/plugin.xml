@@ -7,19 +7,17 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <statusBarWidgetFactory
-                implementation="top.walterInKitchen.gitdiff.component.StatusBarFactory"/>
+        <statusBarWidgetFactory id="top.walterInKitchen.gitdiff.toolsEntry.StatusBarFactory"
+                                implementation="top.walterInKitchen.gitdiff.component.StatusBarFactory"/>
     </extensions>
     <version>(filled automatically by the build plugin)</version>
 
     <actions>
-        <group id="top.walterInKitchen.gitdiff.toolsEntry"
-               class="top.walterInKitchen.gitdiff.actions.MainGroup"
+        <group id="top.walterInKitchen.gitdiff.toolsEntry" class="top.walterInKitchen.gitdiff.actions.MainGroup"
                popup="true" text="Git Diff">
             <add-to-group group-id="ToolsMenu" anchor="first"/>
             <action id="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
-                    class="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction"
-                    text="Compare Two Branches"
+                    class="top.walterInKitchen.gitdiff.actions.TwoBranchDiffAction" text="Compare Two Branches"
                     description="Compare the modification between two branches">
                 <keyboard-shortcut first-keystroke="control alt D" second-keystroke="J" keymap="$default"/>
             </action>
