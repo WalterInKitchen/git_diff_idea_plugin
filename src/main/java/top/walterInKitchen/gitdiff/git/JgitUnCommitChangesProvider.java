@@ -55,6 +55,7 @@ public class JgitUnCommitChangesProvider implements UnCommitChangesProvider {
             int totalDeletions = 0;
             try (DiffFormatter diffFormatter = new DiffFormatter(org.eclipse.jgit.util.io.DisabledOutputStream.INSTANCE)) {
                 diffFormatter.setRepository(repo);
+                diffFormatter.setDiffComparator(CrlfRawTextComparator.INSTANCE);
                 List<DiffEntry> diffs = diffFormatter.scan(oldTreeIter, newTreeIter);
                 totalFiles = diffs.size();
 

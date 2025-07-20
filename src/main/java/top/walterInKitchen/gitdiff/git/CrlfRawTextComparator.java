@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CrlfRawTextComparator extends RawTextComparator {
-    public static RawTextComparator INSTANCE = new CrlfRawTextComparator();
+    public static final RawTextComparator INSTANCE = new CrlfRawTextComparator();
 
     @Override
     public boolean equals(RawText a, int ai, RawText b, int bi) {
